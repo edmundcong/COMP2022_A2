@@ -34,34 +34,31 @@ class Parser:
                                 stack.pop()
                                 input_str = input_str[term_length:]
                         else:
-                                print "error 1"
+                                print "REJECTED"
                                 break
-                elif (parse_table[T][c] is not None):
+                elif (T in parse_table and c in parse_table[T] and parse_table[T][c] is not None):
                         stack.pop()
                         temp = parse_table[T][c]
                         term_pos = 0
                         var_pos = 0
                         temp_stack = []
-                        temp = temp.replace(" ", "") # replace white spaces
+                        temp = temp.replace(" ", "")  # replace white spaces
                         while (temp != ''):
                                 for terminal in terminals:
                                     term_pos = temp.find(terminal, 0)
                                     if (term_pos == 0):
                                         temp_stack.append(terminal)
-                                        # stack.append(terminal)
                                         temp = temp[len(terminal):]
                                 for variable in variables:
                                     var_pos = temp.find(variable, 0)
                                     if (var_pos == 0):
                                         temp_stack.append(variable)
-                                        # stack.append(variable)
                                         temp = temp[len(variable):]
-
                         temp_stack = temp_stack[::-1]  # reverse elements in temp_stack
                         # append each element in temp_stack to stack
                         map(lambda ele: stack.append(ele), temp_stack)
                 else:
-                        print "error 2"
+                        print "REJECTED"
                         break
                 if not input_str:
                         flag = True
@@ -73,6 +70,7 @@ if len(sys.argv) > 1:
         for index, line in enumerate(grammar_file):
             curr_line = line.rstrip()
             test_string = curr_line.replace(" ", "")  # replace white spaces
+            test_string = test_string + '$'
             if (not helper.string_valid(test_string)):
                 print "ERROR_INVALID_SYMBOL"
                 continue

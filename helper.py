@@ -21,6 +21,6 @@ def string_valid(input_string):
                 valid_token = True
         if (not valid_token):
             return False
-        if (temp_str == ''):
+        if (temp_str == '' or temp_str == '\n'):
             finished = True
     return True

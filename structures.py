@@ -3,7 +3,7 @@ terminals = {
         "+", "-", "*", "0", "1", "2", "3", "a", "b", "c", "d", "print", "\"", "if", "else", "{", "}", "(", ")", ";", "$"
 }
 variables = {  # redefine P' to Q and K' to R for key'ing ease
-        "P", "Q", "L", "K", "R", "W", "C'", "C", "E", "O", "V", "T"
+        "P", "Q", "L", "K", "R", "W", "D", "C", "E", "O", "V", "T"
 }
 parse_table = {
         "P": {
@@ -18,14 +18,18 @@ parse_table = {
         },
         "L": {
                 "print": "K;",
-                "if": "C'"
+                "if": "D"
         },
         "K": {
                 "print": "print R"
         },
         "R": {
                 '"': '"W"',
-                "(": "E"
+                "(": "E",
+                "0": "E",
+                "1": "E",
+                "2": "E",
+                "3": "E"
         },
         "W": {
                 "a": "TW",
@@ -34,13 +38,15 @@ parse_table = {
                 "d": "TW",
                 '"': ""
         },
-        "C'": {
+        "D": {
                 "if": "if E { P } C"
         },
         "C": {
                 "else": "else { P }",
                 "}": "",
-                "$": ""
+                "$": "",
+                "print": "",
+                "if": ""
         },
         "E": {
                 "0": "V",
