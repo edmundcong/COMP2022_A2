@@ -27,7 +27,7 @@ class Parser:
                         print "ERROR_INVALID_SYMBOL"
                         break
                 elif (T == c == "$"):
-                        print "ACCEPT"
+                        print "ACCEPTED"
                         flag = False
                 elif (T in terminals or T == '$'):
                         if (T == c):
@@ -67,12 +67,11 @@ class Parser:
 if len(sys.argv) > 1:
     input_string = str(sys.argv[1])  # get the first CLI argument
     with open(input_string, 'r') as grammar_file:
-        for index, line in enumerate(grammar_file):
-            curr_line = line.rstrip()
-            test_string = curr_line.replace(" ", "")  # replace white spaces
-            test_string = test_string + '$'
-            if (not helper.string_valid(test_string)):
-                print "ERROR_INVALID_SYMBOL"
-                continue
-            temp = Parser(test_string)
-            temp.parser_string(test_string)
+        # read entire file, remove new lines and tabs, and remove trailing white spaces
+        curr_line = grammar_file.read().replace('\n', '').replace('\t', "").rstrip()
+        test_string = curr_line.replace(" ", "")  # replace white spaces
+        test_string = test_string + '$'
+        if (not helper.string_valid(test_string)):
+            print "ERROR_INVALID_SYMBOL"
+        temp = Parser(test_string)
+        temp.parser_string(test_string)
