@@ -3,24 +3,38 @@ import structures
 import helper
 
 class Node:
-    def __init__(self, value, parent=None, children=None):
+    def __init__(self, value, children=None):
         self.value = value
-        self.parent = parent
         self.children = children
 
 class Tokens:
-    def __init__(self, var, rule_id=0, LHS='', RHS='', term_count=0):
+    def __init__(self, var, LHS='', RHS='', children_amount=0):
         self.variable = var
         self.LHS = LHS
         self.RHS = RHS
-        self.term_count = term_count
-        self.rule_id = rule_id
+        self.children_amount = children_amount
 
 class Parser:
     def __init__(self, input_str, eval_flag):  # constructor
         self.input_str = input_str
         self.eval_flag = eval_flag
 
+    def tree_print_recursive(self, tree, indent = 0):
+        if (tree is None):
+            return
+        # preorder(node v)
+        # {
+        # visit(v);
+        # for each child w of v
+        #     preorder(w);
+        # }
+        if (indent != 0):
+            print (indent * '|') + '||'
+        indent += 1
+        for ele in tree:
+            print (indent * '-') + '>' + ele.value + '<-[DEPTH = ' + str(indent) + ']'
+            # print len(ele.children)
+            self.tree_print_recursive(ele.children, indent)
 
     def parser_string(self, input_str):
         terminals = structures.terminals
@@ -30,8 +44,6 @@ class Parser:
 
         stack = [Tokens("$"), Tokens("P")]
         expressions = []
-        rule_id = 0
-        # prev_rule_id = 0
         c = ''
         term_length = 0
         while flag:
@@ -55,22 +67,42 @@ class Parser:
                         if (self.eval_flag != 'eval'):
                             print "ACCEPTED"
                         else:
-                            print 'end of program'
+                            self.tree_print_recursive(expressions)
                         flag = False
+                elif (T == 'action_token'):
+                    # check to see if we have an action token sitting on top of the stack
+                    curr_action_token = stack.pop()
+                    # get number of children
+                    number_of_pops = curr_action_token.children_amount
+                    # pop a node from the expressions stack to build a new child given the RHS
+                    # and then push it bac onto the expressions stack
+                    nodes = []
+                    # print curr_action_token.LHS + ' -> ' + curr_action_token.RHS + ' #' + str(number_of_pops)
+                    # for v in expressions:
+                    #     print v.value
+                    for i in range(number_of_pops):
+                        # nodes.insert(0, expressions.pop())
+                        # print expressions[0].value
+                        # if
+                        # if (curr_action_token.LHS in parse_table and curr_action_token.RHS in parse_table[curr_action_token.LHS] and parse_table[curr_action_token.LHS][curr_action_token.RHS] == expressions[0].value):
+                        temp_node = expressions.pop()
+                        # print 'v: ' + temp_node.value
+                        nodes.append(temp_node)
+
+                    nodes = nodes[::-1]
+                    root = Node(curr_action_token.LHS, nodes)
+                    # print 'root: ' + root.value
+                    # for v in nodes:
+                    #     print 'children of this node ^' + v.value
+                    expressions.append(root)
                 elif (T in terminals or T == '$'):
                         if (T == c):
                                 prev_obj = stack.pop()
                                 # whenever we match a terminal we make a bit of our tree
                                 # because a terminal is the smallest bit of our tree
-                                expressions.insert(0,Node(T_obj.variable))
-                                # check to see if we have an action token sitting on top of the stack
-                                temp_T = stack[len(stack) - 1]
+                                expressions.append(Node(T_obj.variable))
+                                # temp_T = stack[len(stack) - 1]
                                 # if we've encountered a rule
-                                # if (temp_T.rule_id != prev_rule_id):
-                                #     print 'RULE: ' + temp_T.LHS + ' -> ' + temp_T.RHS
-                                #     for var in expressions:
-                                #         print 'expression stack value: ' + var.value
-                                prev_rule_id = temp_T.rule_id
                                 input_str = input_str[term_length:]
                         else:
                                 print "REJECTED"
@@ -78,13 +110,11 @@ class Parser:
                 elif (T in parse_table and c in parse_table[T] and parse_table[T][c] is not None):
                         # we use a rule here
                         stack.pop() # term = stack.pop()
-                        # print T + parse_table[T][c]
-                        # stack.append(Node('action_token', T))
                         # push the action token onto stack everytime we pop T above
                         temp = parse_table[T][c]
-
                         term_pos = 0
                         var_pos = 0
+                        rule_size = 0
                         temp_stack = []
                         temp = temp.replace(" ", "")  # replace white spaces
                         rule_length = helper.rule_length(temp)
@@ -93,24 +123,25 @@ class Parser:
                                     term_pos = temp.find(terminal, 0)
                                     if (term_pos == 0):
                                         terminal_length = len(terminal)
+                                        rule_size += 1
                                         # also add action token
-                                        temp_stack.append(Tokens(terminal, rule_id, T, parse_table[T][c], terminal_length))
+                                        temp_stack.append(Tokens(terminal))
                                         temp = temp[terminal_length:]
                                 for variable in variables:
                                     var_pos = temp.find(variable, 0)
                                     if (var_pos == 0):
                                         variable_length = len(variable)
+                                        rule_size += 1
                                         # also add action token
-                                        temp_stack.append(Tokens(variable, rule_id, T, parse_table[T][c], variable_length))
+                                        temp_stack.append(Tokens(variable))
                                         temp = temp[variable_length:]
-
+                        stack.append(Tokens('action_token', T, parse_table[T][c], rule_size))
                         temp_stack = temp_stack[::-1]  # reverse elements in temp_stack
                         # append each element in temp_stack to stack
                         map(lambda ele: stack.append(ele), temp_stack)
                 else:
                         print "REJECTED"
                         break
-                # rule_id += 1
                 if not input_str:
                         flag = True
 

@@ -22,6 +22,8 @@ def concat_strings(first, second):
       first = first.variable
     if (type(second) is not str):
       second = second.variable
+    first = first.replace('action_token', '')
+    second = second.replace('action_token', '')
     return first + second
 
 def print_format(stack_arg, test_string):
