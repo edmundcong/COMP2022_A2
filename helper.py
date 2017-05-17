@@ -22,11 +22,12 @@ def concat_strings(first, second):
       first = first.variable
     if (type(second) is not str):
       second = second.variable
-    first = first.replace('action_token', '')
-    second = second.replace('action_token', '')
     return first + second
 
 def print_format(stack_arg, test_string):
+    # for arg in stack_arg:
+    #   print arg.variable
+    stack_arg = filter(lambda ele: ele.variable != 'action_token', stack_arg)
     #  left argument to lambda is the accumulated value
     #  and right is the is the current value from the iterable
     if (len(stack_arg) > 1):

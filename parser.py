@@ -7,6 +7,18 @@ class Node:
         self.value = value
         self.children = children
 
+
+    def find(self, value):
+        for child in self.children:
+            if (child.value == value):
+                return child
+
+    def has_node(self, value):
+        for child in self.children:
+            if (child.value == value):
+                return True
+        return False
+
 class Tokens:
     def __init__(self, var, LHS='', RHS='', children_amount=0):
         self.variable = var
@@ -22,12 +34,6 @@ class Parser:
     def tree_print_recursive(self, tree, indent = 0):
         if (tree is None):
             return
-        # preorder(node v)
-        # {
-        # visit(v);
-        # for each child w of v
-        #     preorder(w);
-        # }
         if (indent != 0):
             print (indent * '|') + '||'
         indent += 1
@@ -35,6 +41,18 @@ class Parser:
             print (indent * '-') + '>' + ele.value + '<-[DEPTH = ' + str(indent) + ']'
             # print len(ele.children)
             self.tree_print_recursive(ele.children, indent)
+
+    def evaluate_root(self, root):
+        if (root is None):
+            return
+        if root.has_node('L'):
+            L = root.find('L')
+            # if L.has_node('K'):
+            #     print L.find('K').find('R').evaluate()
+        # for ele in tree:
+            # print ele.value
+            # self.call_correct_function(ele)
+            # self.evaluate(ele.children)
 
     def parser_string(self, input_str):
         terminals = structures.terminals
@@ -67,9 +85,10 @@ class Parser:
                         if (self.eval_flag != 'eval'):
                             print "ACCEPTED"
                         else:
-                            self.tree_print_recursive(expressions)
+                            # self.tree_print_recursive(expressions)
+                            self.evaluate_root(expressions[0])
                         flag = False
-                elif (T == 'action_token'):
+                elif (T == 'action_token' and self.eval_flag == 'eval'):
                     # check to see if we have an action token sitting on top of the stack
                     curr_action_token = stack.pop()
                     # get number of children
@@ -135,7 +154,8 @@ class Parser:
                                         # also add action token
                                         temp_stack.append(Tokens(variable))
                                         temp = temp[variable_length:]
-                        stack.append(Tokens('action_token', T, parse_table[T][c], rule_size))
+                        if (self.eval_flag == 'eval'):
+                            stack.append(Tokens('action_token', T, parse_table[T][c], rule_size))
                         temp_stack = temp_stack[::-1]  # reverse elements in temp_stack
                         # append each element in temp_stack to stack
                         map(lambda ele: stack.append(ele), temp_stack)
